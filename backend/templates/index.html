@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>麻雀点数記録アプリ</title>
+  <style>
+    
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f2f2f2;
+  margin-top: 4em;
+  overflow-x: hidden;
+  }
+
+#top-buttons {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  background: #fff;
+  padding: 0.8em 1em;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  z-index: 1000;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.8em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+button {
+  font-size: 1em;
+  padding: 0.5em;
+  border: 2px solid #2196f3;
+  background: #fff;
+  color: #2196f3;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+a.pdf-button {
+  font-size: 1em;
+  padding: 0.5em;
+  border: 2px solid #555555;
+  background: #fff;
+  color: #555555;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+    
+#players {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 1em;
+  margin-bottom: 0;
+  justify-content: center;
+  width: 100%;
+  max-width: 360px;
+  transform-origin: top center; /* 縮小の基準点 */
+  transition: transform 0.2s ease;
+}
+
+.player {
+  width: 180px;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 1em;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  margin: auto;
+ }
+
+.player input[type="text"] {
+  width: 90%;
+  padding: 0.4em;
+  font-size: 1em;
+  margin-bottom: 0.5em;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.player p {
+  font-size: 2em;
+  text-align: center;
+  font-weight: bold;
+  margin: 0.3em 0;
+}
+
+.player p input[type="number"] {
+  width: 90%;
+  padding: 0.2em ;
+  font-size: 1em;
+  margin-bottom: 0.5em;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.score-controls button {
+  width: 100%;
+}
+
+.score-controls {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4em;
+  margin-top: 0.5em;
+}
+
+.supply {
+  margin-bottom: 0;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 0.6em;
+  text-align: center;
+}
+
+.log-table {
+  margin-top: 2em;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+.log-table td:first-child {
+  font-weight: bold;
+  background: #f1f1f1;
+}
+
+.clickable {
+  cursor: pointer;
+  color: #1976d2;
+  text-decoration: underline;
+}
+
+button.plus {
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+button.minus {
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.convert{
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+  margin-top: 1em;
+  margin-bottom: 2em;
+}
+
+.convert button {
+  padding: 0.5em 2em;
+  font-size: 1.2em; 
+}
+
+#players-wrapper {
+  width: 100vw;  /* ビューポートの幅に合わせる */
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+@media screen and (max-width: 600px) {
+  #players {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <h1>麻雀点数記録アプリ</h1>
+<div id="players-wrapper">
+  <div id="players"></div>
+</div>
+    <div id="top-buttons">
+  <a href="https://mj-onemore.com/wp-content/uploads/YakuTensu-OnemoreMJ.pdf" target="_blank" rel="noopener noreferrer" class="pdf-button">早見表</a>
+  <button onclick="recordLog()">記録する</button>
+  <button onclick="resetScores()">リセット</button>
+  <a href="https://rikiriki13-0221.github.io/mahjong-point/符計算.pdf" target="_blank" rel="noopener noreferrer" class="pdf-button">符計算</a>
+  </div>
+
+  <div class="supply">
+    <p>供託点: <span id="supply">0</span></p>
+    <button class="plus" onclick="addSupply()">+1000</button>
+    <button class="minus" onclick="subSupply()">-1000</button>
+  </div>
+
+  <table id="log" class="log-table">
+    <tbody></tbody>
+  </table>
+
+  <div class="convert">
+    <button onclick="setPlayerCount(3)">三麻</button>
+    <button onclick="setPlayerCount(4)">四麻</button>
+  </div>
+
+
+ <script>
+    window.onload = function() {
+    createPlayers();
+    resizePlayers();
+  };
+
+    let playerCount = 4;
+    let totalPoints = 100000;
+    const players = [];
+    const logData = [];
+    const defaultNames = [];
+    for (let i = 0; i < playerCount; i++) {
+      defaultNames.push(`プレイヤー${i + 1}`);
+    }
+
+    function createPlayers() {
+      const playerContainer = document.getElementById('players');
+      document.getElementById('players').innerHTML = '';
+      const defaultScore = (playerCount === 3) ? 35000 : 25000;
+      for (let i = 0; i < playerCount; i++) {
+      const playerDiv = document.createElement('div');
+      playerDiv.className = 'player';
+      playerDiv.innerHTML = `
+        <input type="text" placeholder="プレイヤー${i + 1}" value="プレイヤー${i + 1}" id="name${i}" />
+        <p><input type="number" id="score${i}" value="${defaultScore}" /></p>
+        <div class="score-controls">
+          <button class="plus" onclick="adjustScore(${i}, 1000)">+1000</button>
+          <button class="minus" onclick="adjustScore(${i}, -1000)">-1000</button>
+          <button class="plus" onclick="adjustScore(${i}, 100)">+100</button>
+          <button class="minus" onclick="adjustScore(${i}, -100)">-100</button>
+        </div>
+      `;
+      playerContainer.appendChild(playerDiv);
+    }
+    }
+
+    function setPlayerCount(count){
+      if(!confirm(`${count}人戦に変更しますか？（現在のデータは消えます）`)) return;
+      playerCount = count;
+      totalPoints = (count === 3) ? 105000 : 100000;
+      defaultNames.length = 0;
+      for (let i = 0; i < playerCount; i++) {
+        defaultNames.push(`プレイヤー${i + 1}`);
+      }
+      createPlayers();
+      resetScores();
+    }
+    
+
+   function resizePlayers() {
+   const wrapperWidth = window.innerWidth;
+   const playersWidth = 360; // #playersの固定幅
+
+   let scale = Math.min(1, wrapperWidth / playersWidth);
+
+   const players = document.getElementById('players');
+     players.style.transform = `scale(${scale})`;
+   }
+
+     window.addEventListener('resize', resizePlayers);
+     window.addEventListener('load', resizePlayers);
+
+
+    let supply = 0;
+    function addSupply() {
+      supply += 1000;
+      document.getElementById('supply').textContent = supply;
+    }
+    function subSupply() {
+      if(supply >= 1000) supply -= 1000;
+      document.getElementById('supply').textContent = supply;
+    }
+
+    function adjustScore(index, amount) {
+      const input = document.getElementById(`score${index}`);
+      input.value = parseInt(input.value) + amount;
+    }
+
+    function recordLog() {
+      const names = [], scores = [];
+      let total = supply;
+      for (let i = 0; i < playerCount; i++) {
+        const name = document.getElementById(`name${i}`).value;
+        const score = parseInt(document.getElementById(`score${i}`).value);
+        if (isNaN(score)) return alert("点数が正しく入力されていません");
+        names.push(name);
+        scores.push(score);
+        total += score;
+      }
+
+      if (total !== totalPoints) {
+        alert(`合計点が${totalPoints}点ではありません（現在:${total}点）`);
+        return;
+      }
+
+      const timestamp = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+      logData.unshift({ names: [...names], scores: [...scores], supply: supply, time: timestamp });
+      renderLog();
+      // ★ Pythonに送る
+      fetch("/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+    body: JSON.stringify({
+    players: names,
+    scores: scores,
+    supply: supply,
+    time: timestamp
+  })
+})
+.then(res => res.json())
+.then(data => {
+  console.log("サーバーからの返事:", data);
+});
+
+    }
+
+    function renderLog() {
+      const tbody = document.querySelector('#log tbody');
+      tbody.innerHTML = '';
+
+      if (logData.length === 0) return;
+
+      // 時刻行
+      const timeRow = document.createElement('tr');
+      const timeLabel = document.createElement('td');
+      timeLabel.textContent = '記録時間';
+      timeRow.appendChild(timeLabel);
+      logData.forEach((log, logIndex) => {
+        const cell = document.createElement('td');
+        cell.textContent = log.time;
+        cell.classList.add('clickable');
+        cell.onclick = () => restoreLog(logIndex);
+        timeRow.appendChild(cell);
+      });
+      tbody.appendChild(timeRow);
+
+      // 点数行（プレイヤーごとに1行）
+      for (let i = 0; i < playerCount; i++) {
+        const row = document.createElement('tr');
+        const playerNameCell = document.createElement('td');
+        playerNameCell.textContent = logData[0].names[i]; // 最新の名前表示
+        row.appendChild(playerNameCell);
+
+        logData.forEach(log => {
+          const cell = document.createElement('td');
+          cell.textContent = log.scores[i];
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      }
+
+      // 供託行
+      const supplyRow = document.createElement('tr');
+      const supplyLabel = document.createElement('td');
+      supplyLabel.textContent = '供託';
+      supplyRow.appendChild(supplyLabel);
+
+      logData.forEach(log => {
+        const cell = document.createElement('td');
+        cell.textContent = log.supply;
+        supplyRow.appendChild(cell);
+      });
+      
+      tbody.appendChild(supplyRow);
+    }
+
+    function restoreLog(index) {
+      if (!confirm("本当にこの記録に戻しますか？")) return;
+      const log = logData[index];
+      for (let i = 0; i < playerCount; i++) {
+        document.getElementById(`score${i}`).value = log.scores[i];
+        document.getElementById(`name${i}`).value = log.names[i];
+      }
+      supply = log.supply;
+      document.getElementById('supply').textContent = supply;
+
+      logData.splice(0, index);
+
+      renderLog();
+    }
+
+    function resetScores() {
+      if (!confirm("本当にリセットしますか？")){
+        return;
+      }
+      const defaultScore = (playerCount === 3) ? 35000 : 25000;
+      for (let i = 0; i < playerCount; i++) {
+        document.getElementById(`score${i}`).value = defaultScore;
+        document.getElementById(`name${i}`).value = defaultNames[i];
+      }
+      supply = 0;
+      document.getElementById('supply').textContent = supply;
+      logData.length = 0;
+      renderLog();
+    }
+  </script>
+</body>
+</html>
