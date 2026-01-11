@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>麻雀 点数管理（最小）</title>
+</head>
+<body>
+  <h1>点数管理</h1>
+
+  <p>
+    点数：
+    <span id="score">25000</span>
+  </p>
+
+  <button onclick="add()">+1000</button>
+
+  <script>
+    function add() {
+      const scoreElem = document.getElementById("score");
+      let score = Number(scoreElem.textContent);
+      score += 1000;
+      scoreElem.textContent = score;
+    }
+  </script>
+</body>
+</html>
